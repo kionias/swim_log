@@ -3,7 +3,7 @@ import { ClassInfo } from '../../types/database';
 
 interface ClassFilterProps {
   classes: ClassInfo[];
-  selectedFilter: string; // 'all', class.id, or 'none' (자유수영)
+  selectedFilter: string; // 'all' or class.id
   onSelectFilter: (filterId: string) => void;
 }
 
@@ -39,16 +39,6 @@ export const ClassFilter: React.FC<ClassFilterProps> = ({
         </button>
       ))}
 
-      <button
-        onClick={() => onSelectFilter('none')}
-        className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${
-          selectedFilter === 'none'
-            ? 'bg-cyan-600 text-white shadow-xs shadow-cyan-600/25'
-            : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
-        }`}
-      >
-        자유수영
-      </button>
     </div>
   );
 };

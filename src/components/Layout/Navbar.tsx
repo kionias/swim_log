@@ -54,18 +54,18 @@ export const Navbar: React.FC = () => {
             </div>
           </Link>
 
-          <nav className="hidden md:flex items-center gap-1">
-            <NavLink to="/" className={navItemClass} end>
-              <CalendarIcon className="w-4 h-4" />
-              <span>운동기록</span>
-            </NavLink>
-            <NavLink to={isAdmin ? '/admin' : '/admin/login'} className={navItemClass}>
-              <ShieldCheck className="w-4 h-4" />
-              <span>{isAdmin ? '관리자' : '로그인'}</span>
-            </NavLink>
-          </nav>
+          <div className="ml-auto flex items-center gap-3">
+            <nav className="hidden items-center gap-1 md:flex">
+              <NavLink to="/" className={navItemClass} end>
+                <CalendarIcon className="w-4 h-4" />
+                <span>운동기록</span>
+              </NavLink>
+              <NavLink to={isAdmin ? '/admin' : '/admin/login'} className={navItemClass}>
+                <ShieldCheck className="w-4 h-4" />
+                <span>{isAdmin ? '관리자' : '로그인'}</span>
+              </NavLink>
+            </nav>
 
-          <div className="flex items-center gap-2">
             {isAdmin && (
               <>
                 <Link

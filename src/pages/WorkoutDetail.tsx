@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { 
   ArrowLeft, 
   Share2, 
+  Download,
   PlusCircle, 
   Calendar as CalendarIcon, 
   Waves,
@@ -23,6 +24,7 @@ export const WorkoutDetail: React.FC = () => {
   const [workouts, setWorkouts] = useState<WorkoutWithDetails[]>([]);
   const [loading, setLoading] = useState(true);
   const [isReportOpen, setIsReportOpen] = useState(false);
+  const [isDirectDownloadOpen, setIsDirectDownloadOpen] = useState(false);
 
   const loadData = () => {
     if (!date) return;
@@ -80,13 +82,22 @@ export const WorkoutDetail: React.FC = () => {
 
         <div className="flex items-center gap-2">
           {workouts.length > 0 && (
-            <button
-              onClick={() => setIsReportOpen(true)}
-              className="inline-flex items-center gap-1.5 rounded-xl bg-ocean-600 px-3.5 py-2 text-xs font-bold text-white shadow-md shadow-ocean-600/20 transition hover:bg-ocean-700 sm:text-sm"
-            >
-              <Share2 className="w-4 h-4" />
-              <span>운동 리포트 카드</span>
-            </button>
+            <>
+              <button
+                onClick={() => setIsDirectDownloadOpen(true)}
+                className="inline-flex items-center gap-1.5 rounded-xl border border-ocean-200 bg-ocean-50 px-3.5 py-2 text-xs font-bold text-ocean-700 transition hover:bg-ocean-100 sm:text-sm"
+              >
+                <Download className="w-4 h-4" />
+                <span>PNG 저장</span>
+              </button>
+              <button
+                onClick={() => setIsReportOpen(true)}
+                className="inline-flex items-center gap-1.5 rounded-xl bg-ocean-600 px-3.5 py-2 text-xs font-bold text-white shadow-md shadow-ocean-600/20 transition hover:bg-ocean-700 sm:text-sm"
+              >
+                <Share2 className="w-4 h-4" />
+                <span>운동 리포트 카드</span>
+              </button>
+            </>
           )}
 
           {isAdmin && (
@@ -194,6 +205,13 @@ export const WorkoutDetail: React.FC = () => {
         onClose={() => setIsReportOpen(false)}
         dateStr={date}
         workouts={workouts}
+      />
+      <ReportModal
+        isOpen={isDirectDownloadOpen}
+        onClose={() => setIsDirectDownloadOpen(false)}
+        dateStr={date}
+        workouts={workouts}
+        downloadOnly
       />
     </div>
   );

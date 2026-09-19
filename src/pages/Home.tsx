@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { MonthSummary } from '../components/Calendar/MonthSummary';
 import { ClassFilter } from '../components/Calendar/ClassFilter';
 import { Calendar } from '../components/Calendar/Calendar';
@@ -10,6 +10,7 @@ import { formatDistance } from '../utils/distance';
 import { Loader2 } from 'lucide-react';
 
 export const Home: React.FC = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [year, setYear] = useState(2026);
   const [month, setMonth] = useState(9);
   const [selectedFilter, setSelectedFilter] = useState('all');
@@ -30,6 +31,21 @@ export const Home: React.FC = () => {
   useEffect(() => {
     workoutService.getClasses().then(setClasses).catch(console.error);
   }, []);
+
+  useEffect(() => {
+    setSelectedFilter(searchParams.get('class') || 'all');
+  }, [searchParams]);
+
+  const handleClassFilterChange = (filterId: string) => {
+    setSelectedFilter(filterId);
+    const nextParams = new URLSearchParams(searchParams);
+    if (filterId === 'all') {
+      nextParams.delete('class');
+    } else {
+      nextParams.set('class', filterId);
+    }
+    setSearchParams(nextParams, { replace: true });
+  };
 
   useEffect(() => {
     let isMounted = true;
@@ -123,7 +139,11 @@ export const Home: React.FC = () => {
           </button>
         </div>
 
-        <ClassFilter classes={classes} selectedFilter={selectedFilter} onSelectFilter={setSelectedFilter} />
+        <ClassFilter
+          classes={classes}
+          selectedFilter={selectedFilter}
+          onSelectFilter={handleClassFilterChange}
+        />
       </div>
 
       {loading ? (
