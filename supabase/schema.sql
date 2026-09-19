@@ -49,6 +49,10 @@ CREATE TABLE IF NOT EXISTS public.workout_sets (
   created_at TIMESTAMPTZ DEFAULT now()
 );
 
+-- Apply the current data model when upgrading an existing project.
+ALTER TABLE public.workout_sets
+DROP COLUMN IF EXISTS stroke;
+
 -- Performance Indexes
 CREATE INDEX IF NOT EXISTS idx_workouts_date ON public.workouts(workout_date);
 CREATE INDEX IF NOT EXISTS idx_workouts_class ON public.workouts(class_id);
@@ -169,11 +173,11 @@ BEGIN
 
   -- Insert Classes
   INSERT INTO public.classes (pool_id, name, days, start_time, end_time, description)
-  VALUES (v_pool_id, '저녁 수영 8시 연수반', '월수금', '20:00', '21:00', '월수금 인터벌 및 턴 트레이닝')
+  VALUES (v_pool_id, '8시 연수반(월수금)', '월수금', '20:00', '21:00', '월수금 저녁 수영 연수반')
   RETURNING id INTO v_class_id;
 
   INSERT INTO public.classes (pool_id, name, days, start_time, end_time, description)
-  VALUES (v_pool_id, '화목 마스터즈반', '화목', '20:00', '21:00', '화목 지구력 및 영법 훈련')
+  VALUES (v_pool_id, '8시 연수반(화목)', '화목', '20:00', '21:00', '화목 저녁 수영 연수반')
   RETURNING id INTO v_class2_id;
 
   -- Workout 1: 2026-09-14 (1,500m)
@@ -214,7 +218,8 @@ BEGIN
   (v_workout_18a, 7, 150, '쿨다운');
 
   -- Workout 4: 2026-09-18 자유 수영 (1,000m)
-  INSERT INTO public.workouts (pool_id, NULL, '2026-09-18', 35, 1000, '수업 후 개인 자유수영 롱 디스턴스', '한 번의 스트로크도 헛되지 않는다.')
+  INSERT INTO public.workouts (pool_id, class_id, workout_date, duration_minutes, total_distance, memo, quote)
+  VALUES (v_pool_id, NULL, '2026-09-18', 35, 1000, '수업 후 개인 자유수영 롱 디스턴스', '한 번의 스트로크도 헛되지 않는다.')
   RETURNING id INTO v_workout_18b;
 
   INSERT INTO public.workout_sets (workout_id, sequence, distance, description) VALUES
