@@ -13,13 +13,14 @@ export const ClassFilter: React.FC<ClassFilterProps> = ({
   onSelectFilter,
 }) => {
   return (
-    <div className="flex items-center gap-1.5 overflow-x-auto pb-2 scrollbar-none">
+    <div className="flex items-center gap-1.5 overflow-x-auto py-1 no-scrollbar">
       <button
+        type="button"
         onClick={() => onSelectFilter('all')}
-        className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${
+        className={`px-3.5 py-1.5 rounded-lg text-xs font-extrabold whitespace-nowrap transition-all ${
           selectedFilter === 'all'
             ? 'bg-slate-900 text-white shadow-xs'
-            : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
+            : 'bg-white text-slate-600 border border-slate-200/80 hover:bg-slate-50'
         }`}
       >
         전체
@@ -28,17 +29,17 @@ export const ClassFilter: React.FC<ClassFilterProps> = ({
       {classes.map((cls) => (
         <button
           key={cls.id}
+          type="button"
           onClick={() => onSelectFilter(cls.id)}
-          className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${
+          className={`px-3.5 py-1.5 rounded-lg text-xs font-extrabold whitespace-nowrap transition-all ${
             selectedFilter === cls.id
-              ? 'bg-ocean-600 text-white shadow-xs shadow-ocean-600/25'
-              : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
+              ? 'bg-ocean-600 text-white shadow-xs'
+              : 'bg-white text-slate-600 border border-slate-200/80 hover:bg-slate-50'
           }`}
         >
           {cls.name}
         </button>
       ))}
-
     </div>
   );
 };

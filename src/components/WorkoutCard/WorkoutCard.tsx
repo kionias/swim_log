@@ -102,12 +102,12 @@ export const WorkoutCard: React.FC<WorkoutCardProps> = ({
 
         {/* Quote */}
         {workout.quote && (
-          <div className="mt-5 rounded-2xl border border-ocean-200 bg-ocean-50 p-4 shadow-xs sm:p-5">
-            <div className="flex items-center gap-2 text-base font-black tracking-tight text-slate-700 sm:text-lg">
-              <Quote className="h-5 w-5 text-ocean-600 sm:h-6 sm:w-6" />
+          <div className="mt-5 rounded-xl border border-ocean-100 bg-ocean-50/50 p-4 sm:p-5">
+            <div className="flex items-center gap-1.5 text-xs font-extrabold uppercase tracking-wider text-ocean-700">
+              <Quote className="h-4 w-4 text-ocean-600" />
               <span>오늘의 수영 한마디</span>
             </div>
-            <p className="mt-3 break-words text-lg font-black italic leading-tight text-slate-800 sm:text-xl">
+            <p className="mt-2.5 break-words text-base sm:text-lg font-bold italic leading-relaxed text-slate-800">
               “{workout.quote}”
             </p>
           </div>

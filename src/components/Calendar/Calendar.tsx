@@ -105,52 +105,50 @@ export const Calendar: React.FC<CalendarProps> = ({
             <div
               key={day.dateKey}
               onClick={() => handleDayClick(day.dateKey)}
-              className={`min-h-[85px] sm:min-h-[110px] p-2 sm:p-2.5 flex flex-col justify-between transition-all cursor-pointer select-none group relative ${
+              className={`min-h-[85px] sm:min-h-[105px] p-2 flex flex-col justify-between transition-all cursor-pointer select-none group relative ${
                 !day.isCurrentMonth
-                  ? 'bg-slate-50/40 opacity-40'
+                  ? 'bg-slate-50/30 opacity-35'
                   : hasWorkout
-                  ? 'bg-ocean-50/20 hover:bg-ocean-100/40'
+                  ? 'bg-ocean-50/30 hover:bg-ocean-100/50'
                   : 'bg-white hover:bg-slate-50'
-              } ${day.isToday ? 'ring-2 ring-inset ring-ocean-500/80' : ''}`}
+              }`}
             >
               {/* Day number top bar */}
               <div className="flex items-center justify-between">
                 <span
-                  className={`text-xs font-bold leading-none inline-flex items-center justify-center w-6 h-6 rounded-full ${
+                  className={`text-xs sm:text-sm font-extrabold leading-none inline-flex items-center justify-center w-6 h-6 rounded-full transition-transform group-hover:scale-105 ${
                     day.isToday
-                      ? 'bg-ocean-600 text-white shadow-xs'
+                      ? 'bg-ocean-600 text-white shadow-xs font-black'
                       : isSun
                       ? 'text-rose-600'
                       : isSat
                       ? 'text-ocean-600'
-                      : 'text-slate-700'
+                      : 'text-slate-800'
                   }`}
                 >
                   {day.dayNumber}
                 </span>
 
-                {/* Multiple workouts indicator badge */}
-                {summary && summary.workout_count > 1 && (
-                  <span
-                    title={`${summary.workout_count}개 운동`}
-                    className="text-[10px] font-extrabold px-1.5 py-0.5 rounded-full bg-cyan-100 text-cyan-800"
-                  >
-                    {summary.workout_count}건
-                  </span>
+                {/* Blue dot / workout count indicator */}
+                {hasWorkout && (
+                  <div className="flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-ocean-600 inline-block" />
+                    {summary.workout_count > 1 && (
+                      <span className="text-[10px] font-black text-ocean-700">
+                        {summary.workout_count}
+                      </span>
+                    )}
+                  </div>
                 )}
               </div>
 
               {/* Distance content */}
-              <div className="mt-1">
-                {hasWorkout ? (
-                  <div className="bg-ocean-600 text-white group-hover:bg-ocean-700 rounded-lg p-1 sm:p-1.5 text-center shadow-xs transition-colors">
-                    <span className="block text-[11px] sm:text-xs font-black tracking-tight leading-tight">
+              <div className="mt-2 text-center">
+                {hasWorkout && (
+                  <div className="py-1 px-1.5 rounded-md text-center">
+                    <span className="block text-xs sm:text-sm font-black text-ocean-700 tracking-tight">
                       {formatDistance(summary.total_distance)}
                     </span>
-                  </div>
-                ) : (
-                  <div className="text-center py-1">
-                    <span className="text-slate-300 text-xs font-semibold">-</span>
                   </div>
                 )}
               </div>

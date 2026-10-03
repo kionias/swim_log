@@ -9,7 +9,9 @@ import {
   Clock, 
   BookOpen, 
   Sparkles,
-  Loader2 
+  Loader2,
+  ChevronUp,
+  ChevronDown
 } from 'lucide-react';
 import { workoutService } from '../services/workoutService';
 import { Pool, ClassInfo } from '../types/database';
@@ -111,6 +113,28 @@ export const WorkoutEditor: React.FC = () => {
       return;
     }
     setSets(prev => prev.filter((_, i) => i !== index).map((s, i) => ({ ...s, sequence: i + 1 })));
+  };
+
+  const handleMoveSetUp = (index: number) => {
+    if (index === 0) return;
+    setSets(prev => {
+      const next = [...prev];
+      const temp = next[index];
+      next[index] = next[index - 1];
+      next[index - 1] = temp;
+      return next.map((s, i) => ({ ...s, sequence: i + 1 }));
+    });
+  };
+
+  const handleMoveSetDown = (index: number) => {
+    if (index === sets.length - 1) return;
+    setSets(prev => {
+      const next = [...prev];
+      const temp = next[index];
+      next[index] = next[index + 1];
+      next[index + 1] = temp;
+      return next.map((s, i) => ({ ...s, sequence: i + 1 }));
+    });
   };
 
   const handleSetChange = (index: number, field: keyof SetFormState, value: any) => {
@@ -313,17 +337,37 @@ export const WorkoutEditor: React.FC = () => {
                 className="p-3 sm:p-3.5 rounded-xl border border-slate-200 bg-slate-50/50 space-y-2.5"
               >
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-mono font-black text-slate-400">
+                  <span className="text-xs font-mono font-black text-slate-500">
                     SET {String(set.sequence).padStart(2, '0')}
                   </span>
-                  <button
-                    type="button"
-                    onClick={() => handleRemoveSet(index)}
-                    className="text-slate-400 hover:text-rose-600 transition p-1"
-                    title="세트 삭제"
-                  >
-                    <Trash2 className="w-3.5 h-3.5" />
-                  </button>
+                  <div className="flex items-center gap-1">
+                    <button
+                      type="button"
+                      onClick={() => handleMoveSetUp(index)}
+                      disabled={index === 0}
+                      className="p-1 text-slate-400 hover:text-ocean-600 hover:bg-ocean-50 rounded transition disabled:opacity-25 disabled:hover:bg-transparent disabled:hover:text-slate-400"
+                      title="위로 이동"
+                    >
+                      <ChevronUp className="w-4 h-4" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleMoveSetDown(index)}
+                      disabled={index === sets.length - 1}
+                      className="p-1 text-slate-400 hover:text-ocean-600 hover:bg-ocean-50 rounded transition disabled:opacity-25 disabled:hover:bg-transparent disabled:hover:text-slate-400"
+                      title="아래로 이동"
+                    >
+                      <ChevronDown className="w-4 h-4" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveSet(index)}
+                      className="p-1 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded transition ml-1"
+                      title="세트 삭제"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
