@@ -15,6 +15,7 @@ import { formatKoreanDate } from '../utils/date';
 import { formatDistance } from '../utils/distance';
 import { WorkoutCard } from '../components/WorkoutCard/WorkoutCard';
 import { ReportModal } from '../components/Report/ReportModal';
+import { SEOHead } from '../components/SEOHead';
 import { useAuth } from '../context/AuthContext';
 
 export const WorkoutDetail: React.FC = () => {
@@ -67,9 +68,23 @@ export const WorkoutDetail: React.FC = () => {
 
   const totalDistance = workouts.reduce((sum, w) => sum + (w.total_distance || 0), 0);
   const totalSets = workouts.reduce((sum, w) => sum + (w.sets?.length || 0), 0);
+  const formattedDate = formatKoreanDate(date, true);
+
+  const seoTitle = workouts.length > 0
+    ? `${formattedDate} 수영 기록 (${formatDistance(totalDistance)}) | SWIM LOG`
+    : `${formattedDate} 수영 기록 | SWIM LOG`;
+
+  const seoDescription = workouts.length > 0
+    ? `${formattedDate} 수영 운동 기록: 총 거리 ${formatDistance(totalDistance)}, ${totalSets}개 세트 완료. SWIM LOG에서 상세 기록을 확인하세요.`
+    : `${formattedDate} 수영 운동 상세 기록입니다. SWIM LOG에서 확인해 보세요.`;
 
   return (
     <div className="space-y-6 animate-fade-in">
+      <SEOHead
+        title={seoTitle}
+        description={seoDescription}
+        type="article"
+      />
       {/* Top navigation & action bar */}
       <div className="flex items-center justify-between">
         <Link

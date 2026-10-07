@@ -3,6 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { MonthSummary } from '../components/Calendar/MonthSummary';
 import { ClassFilter } from '../components/Calendar/ClassFilter';
 import { Calendar } from '../components/Calendar/Calendar';
+import { SEOHead } from '../components/SEOHead';
 import { workoutService } from '../services/workoutService';
 import { ClassInfo, DailySummary, MonthlyStats, WorkoutWithDetails } from '../types/database';
 import { formatKoreanDate, formatYearMonth } from '../utils/date';
@@ -116,6 +117,11 @@ export const Home: React.FC = () => {
 
   return (
     <div className="space-y-5 animate-fade-in">
+      <SEOHead
+        title="SWIM LOG — 수영 운동 기록"
+        description="나의 수영 운동 기록 및 월별 수영 통계. 오늘도 수영하는 멋진 당신을 응원합니다."
+        type="website"
+      />
       {/* Swimming Pool Hero Banner as recommended in ux_개선.png */}
       <div
         className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-ocean-900 via-ocean-800 to-slate-900 p-6 sm:p-8 text-white shadow-lg"
