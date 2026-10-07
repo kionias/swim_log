@@ -69,6 +69,8 @@ export const WorkoutDetail: React.FC = () => {
   const totalDistance = workouts.reduce((sum, w) => sum + (w.total_distance || 0), 0);
   const totalSets = workouts.reduce((sum, w) => sum + (w.sets?.length || 0), 0);
   const formattedDate = formatKoreanDate(date, true);
+  const cleanDateStr = date ? date.replace(/-/g, '') : '';
+  const ogImage = cleanDateStr ? `/log_image/${cleanDateStr}.png` : '/image/background_01.png';
 
   const seoTitle = workouts.length > 0
     ? `${formattedDate} 수영 기록 (${formatDistance(totalDistance)}) | SWIM LOG`
@@ -83,6 +85,7 @@ export const WorkoutDetail: React.FC = () => {
       <SEOHead
         title={seoTitle}
         description={seoDescription}
+        image={ogImage}
         type="article"
       />
       {/* Top navigation & action bar */}
@@ -164,22 +167,30 @@ export const WorkoutDetail: React.FC = () => {
       ) : (
         <>
           {/* Daily Total Distance Highlight Banner */}
-          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-ocean-700 via-ocean-600 to-ocean-500 p-6 text-white shadow-xl shadow-ocean-600/15 sm:p-8">
+          <div
+            className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-ocean-900 via-ocean-800 to-slate-900 p-6 sm:p-8 text-white shadow-xl shadow-ocean-900/20"
+            style={{
+              backgroundImage: "url('/image/background_01.png')",
+              backgroundPosition: 'center',
+              backgroundSize: 'cover',
+            }}
+          >
+            <div className="absolute inset-0 bg-gradient-to-r from-ocean-950/85 via-ocean-900/70 to-transparent" />
             <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
-                <div className="flex items-center gap-2 text-ocean-200 text-xs sm:text-sm font-semibold mb-1">
-                  <CalendarIcon className="w-4 h-4" />
+                <div className="flex items-center gap-2 text-cyan-300 text-xs sm:text-sm font-bold mb-1.5">
+                  <CalendarIcon className="w-4 h-4 text-cyan-300" />
                   <span>{formatKoreanDate(date, true)}</span>
                 </div>
                 <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
                   오늘의 총 수영 거리
                 </h1>
-                <p className="text-xs text-ocean-100/80 mt-1">
+                <p className="text-xs sm:text-sm font-semibold text-ocean-100/90 mt-1">
                   총 {totalSets}개의 운동 세트 완료
                 </p>
               </div>
 
-              <div className="bg-white/10 backdrop-blur-md rounded-2xl px-6 py-4 border border-white/15 text-center sm:text-right">
+              <div className="bg-white/10 backdrop-blur-md rounded-2xl px-6 py-4 border border-white/15 text-center sm:text-right shadow-inner">
                 <span className="text-[11px] uppercase font-bold tracking-widest text-cyan-200 block">
                   TOTAL DISTANCE
                 </span>
@@ -188,10 +199,6 @@ export const WorkoutDetail: React.FC = () => {
                 </span>
               </div>
             </div>
-
-            {/* Background water accents */}
-            <div className="absolute -bottom-8 -right-8 w-44 h-44 bg-cyan-400/20 rounded-full blur-2xl pointer-events-none" />
-            <div className="absolute top-0 right-1/4 w-32 h-32 bg-white/10 rounded-full blur-xl pointer-events-none" />
           </div>
 
           {/* List of workout cards on this date */}
