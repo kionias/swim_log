@@ -11,7 +11,7 @@ interface SEOHeadProps {
 export const SEOHead: React.FC<SEOHeadProps> = ({
   title = 'SWIM LOG — 수영 운동 기록',
   description = 'SWIM LOG - 나의 수영 운동 기록 및 월별 수영 통계. 오늘도 수영하는 멋진 당신을 응원합니다.',
-  image = '/image/background_01.png',
+  image = '/image/og_tag_image_01.png',
   url,
   type = 'website',
 }) => {

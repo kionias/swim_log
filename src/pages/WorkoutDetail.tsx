@@ -70,7 +70,7 @@ export const WorkoutDetail: React.FC = () => {
   const totalSets = workouts.reduce((sum, w) => sum + (w.sets?.length || 0), 0);
   const formattedDate = formatKoreanDate(date, true);
 
-  // Try YYYY-MM-DD.png in log_image; fall back to background_01.png if file missing
+  // Try YYYY-MM-DD.png in log_image; fall back to og_tag_image_01.png if file missing
   const ogImageUrl = `/log_image/${date}.png`;
 
   const seoTitle = workouts.length > 0

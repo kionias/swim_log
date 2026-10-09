@@ -482,7 +482,7 @@ export const WorkoutEditor: React.FC = () => {
           width: '1200px',
           height: '630px',
           overflow: 'hidden',
-          backgroundImage: "url('/image/background_01.png')",
+          backgroundImage: "url('/image/og_tag_image_01.png')",
           backgroundPosition: 'center',
           backgroundSize: 'cover',
           fontFamily: 'Pretendard, -apple-system, sans-serif',
