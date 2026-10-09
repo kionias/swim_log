@@ -15,12 +15,8 @@ import {
 import { calculateTotalDistance } from '../utils/distance';
 import { getQuoteForDate } from '../utils/quotes';
 
-// ----- Supabase Storage OG Image Upload -----
-const OG_IMAGE_BUCKET = 'og-images';
-
 /**
- * Uploads a PNG data URL to Supabase Storage as "YYYY-MM-DD.png"
- * and returns the public URL. Falls back to null on error.
+ * Returns the public URL for the OG image at /log_image/YYYY-MM-DD.png
  */
 export async function uploadOgImage(dateStr: string, dataUrl: string): Promise<string | null> {
   try {
@@ -32,11 +28,8 @@ export async function uploadOgImage(dateStr: string, dataUrl: string): Promise<s
     for (let i = 0; i < binaryStr.length; i++) {
       bytes[i] = binaryStr.charCodeAt(i);
     }
-    const blob = new Blob([bytes], { type: 'image/png' });
-
-    // In a static site, we use fetch to send the image to a server endpoint
-    // or save it locally. Here we assume a server endpoint exists at /api/save-image
-    // For now, we return the expected URL.
+    // Note: dataUrl is available but not used in static site mode
+    // In production, send dataUrl to server endpoint to save file
     return `/log_image/${fileName}`;
   } catch (err) {
     console.error('OG image upload failed:', err);

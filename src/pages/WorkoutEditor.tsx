@@ -181,8 +181,8 @@ export const WorkoutEditor: React.FC = () => {
     try {
       setSaving(true);
 
-      // 1. Generate OG image and upload to Supabase Storage
-      const ogImageUrl = await generateAndUploadOgImage(workoutDate);
+      // 1. Generate OG image and upload
+      await generateAndUploadOgImage(workoutDate);
 
       // 2. Save workout (with og_image_url if upload succeeded)
       await workoutService.saveWorkout(
