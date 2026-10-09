@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { 
   Plus, 
@@ -18,6 +18,7 @@ import { Pool, ClassInfo } from '../types/database';
 import { useAuth } from '../context/AuthContext';
 import { calculateTotalDistance, formatDistance } from '../utils/distance';
 import { getRandomQuote } from '../utils/quotes';
+import { toPng } from 'html-to-image';
 
 interface SetFormState {
   sequence: number;
@@ -40,7 +41,6 @@ export const WorkoutEditor: React.FC = () => {
   const [durationMinutes, setDurationMinutes] = useState(60);
   const [memo, setMemo] = useState('');
   const [quote, setQuote] = useState('');
-  
   const [sets, setSets] = useState<SetFormState[]>([
     { sequence: 1, content: '웜업 자유형', distance: 200 }
   ]);
@@ -49,6 +49,7 @@ export const WorkoutEditor: React.FC = () => {
   const [classes, setClasses] = useState<ClassInfo[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const hiddenImageRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!isAdmin) {
@@ -148,6 +149,25 @@ export const WorkoutEditor: React.FC = () => {
   // Automatic distance calculation
   const totalDistance = calculateTotalDistance(sets);
 
+  // Utility function to generate image from workout data
+  const generateWorkoutImage = async (workoutDate: string): Promise<string> => {
+    if (!hiddenImageRef.current) return `/image/${workoutDate.replace(/-/g, '')}.png`;
+    
+    try {
+      // Generate image with 2x pixel ratio for better quality
+      const dataUrl = await toPng(hiddenImageRef.current, {
+        pixelRatio: 2,
+        cacheBust: true,
+        quality: 0.95,
+      });
+      return dataUrl;
+    } catch (err) {
+      console.error('Failed to generate workout image:', err);
+      // Fallback to date-based image path
+      return `/image/${workoutDate.replace(/-/g, '')}.png`;
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!poolId) {
@@ -157,6 +177,10 @@ export const WorkoutEditor: React.FC = () => {
 
     try {
       setSaving(true);
+      
+      // Generate image from current workout data before saving
+      const generatedImageUrl = await generateWorkoutImage(workoutDate);
+      
       await workoutService.saveWorkout(
         {
           id: isEdit ? id : undefined,
@@ -166,6 +190,7 @@ export const WorkoutEditor: React.FC = () => {
           duration_minutes: durationMinutes,
           memo,
           quote: quote || getRandomQuote(),
+          og_image: generatedImageUrl,
         },
         sets.map((set) => ({
           sequence: set.sequence,
@@ -173,6 +198,7 @@ export const WorkoutEditor: React.FC = () => {
           description: set.content,
         }))
       );
+      
       navigate(`/workouts/${workoutDate}`);
     } catch (err) {
       console.error(err);
