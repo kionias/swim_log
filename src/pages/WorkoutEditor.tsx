@@ -159,9 +159,9 @@ export const WorkoutEditor: React.FC = () => {
       // Wait for fonts/images to settle
       await new Promise<void>((resolve) => setTimeout(resolve, 200));
       const dataUrl = await toPng(hiddenImageRef.current, {
-        pixelRatio: 2,
+        pixelRatio: 1.5,
         cacheBust: true,
-        quality: 1.0,
+        quality: 0.85,
       });
       const publicUrl = await uploadOgImage(dateStr, dataUrl);
       return publicUrl;
@@ -535,7 +535,17 @@ export const WorkoutEditor: React.FC = () => {
             color: 'rgba(255,255,255,0.90)',
             margin: '0 0 12px 0',
           }}>
-            오늘의 총 수영 거리
+            오늘의 총 수영 거리 — {formatDistance(totalDistance)} 달성!
+          </p>
+
+          {/* CTA */}
+          <p style={{
+            fontSize: '20px',
+            fontWeight: 700,
+            color: '#67e8f9',
+            margin: '16px 0 0 0',
+          }}>
+            지금 바로 기록 확인하기 →
           </p>
 
           {/* Total distance — hero */}

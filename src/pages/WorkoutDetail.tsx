@@ -74,12 +74,12 @@ export const WorkoutDetail: React.FC = () => {
   const ogImageUrl = `/log_image/${date}.png`;
 
   const seoTitle = workouts.length > 0
-    ? `${formattedDate} 수영 기록 (${formatDistance(totalDistance)}) | SWIM LOG`
-    : `${formattedDate} 수영 기록 | SWIM LOG`;
+    ? `${formattedDate} 수영 기록 — 총 거리 ${formatDistance(totalDistance)}, ${totalSets}개 세트 완료 | SWIM LOG`
+    : `${formattedDate} 수영 기록 — 오늘의 운동을 기록하세요 | SWIM LOG`;
 
   const seoDescription = workouts.length > 0
-    ? `${formattedDate} 수영 운동 기록: 총 거리 ${formatDistance(totalDistance)}, ${totalSets}개 세트 완료. SWIM LOG에서 상세 기록을 확인하세요.`
-    : `${formattedDate} 수영 운동 상세 기록입니다. SWIM LOG에서 확인해 보세요.`;
+    ? `${formattedDate} 수영 운동 기록: 총 거리 ${formatDistance(totalDistance)}, ${totalSets}개 세트 완료. 오늘의 수영 기록을 확인하고 운동 리포트 카드를 공유해 보세요. SWIM LOG에서 상세 기록을 확인하세요.`
+    : `${formattedDate} 수영 운동 상세 기록입니다. 오늘의 운동을 기록하고, 총 거리와 세트 정보를 확인해 보세요. SWIM LOG에서 운동 기록을 관리할 수 있습니다.`;
 
   return (
     <div className="space-y-6 animate-fade-in">
