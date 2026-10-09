@@ -43,6 +43,9 @@ const createWorkout = (date: string, classId: string, quote: string, rows: SeedR
     description,
   }));
 
+  // Convert date from 'YYYY-MM-DD' to 'YYYY-MM-DD' for image filename
+  const imageDate = date;
+
   return {
     id,
     class_id: classId,
@@ -52,6 +55,7 @@ const createWorkout = (date: string, classId: string, quote: string, rows: SeedR
     total_distance: sets.reduce((sum, set) => sum + set.distance, 0),
     memo: '',
     quote,
+    og_image: `/image/${imageDate}.png`,
     pool: INITIAL_POOLS[0],
     class: INITIAL_CLASSES.find((item) => item.id === classId),
     sets,

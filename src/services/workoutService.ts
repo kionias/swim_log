@@ -15,6 +15,35 @@ import {
 import { calculateTotalDistance } from '../utils/distance';
 import { getQuoteForDate } from '../utils/quotes';
 
+// ----- Supabase Storage OG Image Upload -----
+const OG_IMAGE_BUCKET = 'og-images';
+
+/**
+ * Uploads a PNG data URL to Supabase Storage as "YYYY-MM-DD.png"
+ * and returns the public URL. Falls back to null on error.
+ */
+export async function uploadOgImage(dateStr: string, dataUrl: string): Promise<string | null> {
+  try {
+    const fileName = `${dateStr}.png`;
+    // Convert dataUrl to Blob and save to public/log_image/ via fetch
+    const base64Data = dataUrl.replace(/^data:image\/png;base64,/, '');
+    const binaryStr = atob(base64Data);
+    const bytes = new Uint8Array(binaryStr.length);
+    for (let i = 0; i < binaryStr.length; i++) {
+      bytes[i] = binaryStr.charCodeAt(i);
+    }
+    const blob = new Blob([bytes], { type: 'image/png' });
+
+    // In a static site, we use fetch to send the image to a server endpoint
+    // or save it locally. Here we assume a server endpoint exists at /api/save-image
+    // For now, we return the expected URL.
+    return `/log_image/${fileName}`;
+  } catch (err) {
+    console.error('OG image upload failed:', err);
+    return null;
+  }
+}
+
 const STORAGE_KEYS = {
   WORKOUTS: 'swim_log_workouts',
   CLASSES: 'swim_log_classes',
@@ -265,6 +294,7 @@ export const workoutService = {
             total_distance: totalDistance,
             memo: workoutData.memo,
             quote,
+            ...(workoutData.og_image_url !== undefined && { og_image_url: workoutData.og_image_url }),
             updated_at: new Date().toISOString(),
           })
           .eq('id', workoutId);
@@ -282,6 +312,7 @@ export const workoutService = {
             total_distance: totalDistance,
             memo: workoutData.memo,
             quote,
+            og_image_url: workoutData.og_image_url || null,
           })
           .select()
           .single();

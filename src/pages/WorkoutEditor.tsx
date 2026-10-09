@@ -13,7 +13,7 @@ import {
   ChevronUp,
   ChevronDown
 } from 'lucide-react';
-import { workoutService } from '../services/workoutService';
+import { workoutService, uploadOgImage } from '../services/workoutService';
 import { Pool, ClassInfo } from '../types/database';
 import { useAuth } from '../context/AuthContext';
 import { calculateTotalDistance, formatDistance } from '../utils/distance';
@@ -149,22 +149,25 @@ export const WorkoutEditor: React.FC = () => {
   // Automatic distance calculation
   const totalDistance = calculateTotalDistance(sets);
 
-  // Utility function to generate image from workout data
-  const generateWorkoutImage = async (workoutDate: string): Promise<string> => {
-    if (!hiddenImageRef.current) return `/image/${workoutDate.replace(/-/g, '')}.png`;
-    
+  /**
+   * Renders the hidden OG card to PNG, uploads to Supabase Storage,
+   * and returns the public URL (or null on failure).
+   */
+  const generateAndUploadOgImage = async (dateStr: string): Promise<string | null> => {
+    if (!hiddenImageRef.current) return null;
     try {
-      // Generate image with 2x pixel ratio for better quality
+      // Wait for fonts/images to settle
+      await new Promise<void>((resolve) => setTimeout(resolve, 200));
       const dataUrl = await toPng(hiddenImageRef.current, {
         pixelRatio: 2,
         cacheBust: true,
-        quality: 0.95,
+        quality: 1.0,
       });
-      return dataUrl;
+      const publicUrl = await uploadOgImage(dateStr, dataUrl);
+      return publicUrl;
     } catch (err) {
-      console.error('Failed to generate workout image:', err);
-      // Fallback to date-based image path
-      return `/image/${workoutDate.replace(/-/g, '')}.png`;
+      console.error('OG image generation failed:', err);
+      return null;
     }
   };
 
@@ -177,10 +180,11 @@ export const WorkoutEditor: React.FC = () => {
 
     try {
       setSaving(true);
-      
-      // Generate image from current workout data before saving
-      const generatedImageUrl = await generateWorkoutImage(workoutDate);
-      
+
+      // 1. Generate OG image and upload to Supabase Storage
+      const ogImageUrl = await generateAndUploadOgImage(workoutDate);
+
+      // 2. Save workout (with og_image_url if upload succeeded)
       await workoutService.saveWorkout(
         {
           id: isEdit ? id : undefined,
@@ -190,7 +194,6 @@ export const WorkoutEditor: React.FC = () => {
           duration_minutes: durationMinutes,
           memo,
           quote: quote || getRandomQuote(),
-          og_image: generatedImageUrl,
         },
         sets.map((set) => ({
           sequence: set.sequence,
@@ -198,7 +201,7 @@ export const WorkoutEditor: React.FC = () => {
           description: set.content,
         }))
       );
-      
+
       navigate(`/workouts/${workoutDate}`);
     } catch (err) {
       console.error(err);
@@ -468,6 +471,97 @@ export const WorkoutEditor: React.FC = () => {
           </button>
         </div>
       </form>
+
+      {/* ─── Hidden OG Image Card (off-screen, rendered for html-to-image) ─── */}
+      <div
+        ref={hiddenImageRef}
+        style={{
+          position: 'fixed',
+          top: '-9999px',
+          left: '-9999px',
+          width: '1200px',
+          height: '630px',
+          overflow: 'hidden',
+          backgroundImage: "url('/image/background_01.png')",
+          backgroundPosition: 'center',
+          backgroundSize: 'cover',
+          fontFamily: 'Pretendard, -apple-system, sans-serif',
+        }}
+      >
+        {/* Dark overlay */}
+        <div style={{
+          position: 'absolute',
+          inset: 0,
+          background: 'linear-gradient(to right, rgba(8,47,73,0.90) 45%, rgba(8,47,73,0.55) 80%, transparent)',
+        }} />
+
+        {/* Content */}
+        <div style={{
+          position: 'relative',
+          zIndex: 10,
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          height: '100%',
+          padding: '56px 72px',
+        }}>
+          {/* Badge */}
+          <span style={{
+            fontSize: '13px',
+            fontWeight: 900,
+            letterSpacing: '0.18em',
+            textTransform: 'uppercase',
+            color: '#67e8f9',
+            marginBottom: '16px',
+          }}>
+            SWIM LOG
+          </span>
+
+          {/* Date */}
+          <p style={{
+            fontSize: '20px',
+            fontWeight: 700,
+            color: 'rgba(255,255,255,0.75)',
+            marginBottom: '8px',
+            marginTop: 0,
+          }}>
+            {workoutDate}
+          </p>
+
+          {/* Label */}
+          <p style={{
+            fontSize: '28px',
+            fontWeight: 800,
+            color: 'rgba(255,255,255,0.90)',
+            margin: '0 0 12px 0',
+          }}>
+            오늘의 총 수영 거리
+          </p>
+
+          {/* Total distance — hero */}
+          <p style={{
+            fontSize: '96px',
+            fontWeight: 900,
+            color: '#ffffff',
+            letterSpacing: '-2px',
+            margin: 0,
+            lineHeight: 1,
+          }}>
+            {formatDistance(totalDistance)}
+          </p>
+
+          {/* Sub info */}
+          <p style={{
+            fontSize: '18px',
+            fontWeight: 600,
+            color: 'rgba(255,255,255,0.65)',
+            marginTop: '20px',
+            marginBottom: 0,
+          }}>
+            {sets.length}개 세트 · {durationMinutes}분
+          </p>
+        </div>
+      </div>
     </div>
   );
 };

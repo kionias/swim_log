@@ -36,6 +36,7 @@ export interface Workout {
   total_distance: number; // in meters
   memo?: string;
   quote?: string;
+  og_image_url?: string | null;
   created_at?: string;
   updated_at?: string;
 }

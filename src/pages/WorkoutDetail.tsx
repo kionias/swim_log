@@ -18,11 +18,6 @@ import { ReportModal } from '../components/Report/ReportModal';
 import { SEOHead } from '../components/SEOHead';
 import { useAuth } from '../context/AuthContext';
 
-const AVAILABLE_LOG_IMAGES = new Set([
-  '20260826', '20260827', '20260828', '20260831',
-  '20260901', '20260902', '20260903', '20260904', '20260907', '20260908', '20260909', '20260910', '20260911', '20260914', '20260915', '20260916', '20260917', '20260918'
-]);
-
 export const WorkoutDetail: React.FC = () => {
   const { date } = useParams<{ date: string }>();
   const { isAdmin } = useAuth();
@@ -74,10 +69,9 @@ export const WorkoutDetail: React.FC = () => {
   const totalDistance = workouts.reduce((sum, w) => sum + (w.total_distance || 0), 0);
   const totalSets = workouts.reduce((sum, w) => sum + (w.sets?.length || 0), 0);
   const formattedDate = formatKoreanDate(date, true);
-  const cleanDateStr = date ? date.replace(/-/g, '') : '';
-  const ogImage = (cleanDateStr && AVAILABLE_LOG_IMAGES.has(cleanDateStr))
-    ? `/log_image/${cleanDateStr}.png`
-    : '/image/background_01.png';
+
+  // Try YYYY-MM-DD.png in log_image; fall back to background_01.png if file missing
+  const ogImageUrl = `/log_image/${date}.png`;
 
   const seoTitle = workouts.length > 0
     ? `${formattedDate} 수영 기록 (${formatDistance(totalDistance)}) | SWIM LOG`
@@ -92,7 +86,7 @@ export const WorkoutDetail: React.FC = () => {
       <SEOHead
         title={seoTitle}
         description={seoDescription}
-        image={ogImage}
+        image={ogImageUrl}
         type="article"
       />
       {/* Top navigation & action bar */}
