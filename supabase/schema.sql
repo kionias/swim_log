@@ -105,3 +105,37 @@ CREATE INDEX IF NOT EXISTS idx_workouts_pool_id
 
 CREATE INDEX IF NOT EXISTS idx_workout_sets_workout_sequence
   ON public.workout_sets(workout_id, sequence);
+
+-- 7. Storage bucket for workout OG images
+INSERT INTO storage.buckets (id, name, public)
+VALUES ('og-images', 'og-images', true)
+ON CONFLICT (id) DO UPDATE SET public = true;
+
+-- Policies for og-images bucket
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies WHERE policyname = 'Public Access for og-images' AND tablename = 'objects'
+  ) THEN
+    CREATE POLICY "Public Access for og-images"
+    ON storage.objects FOR SELECT
+    USING (bucket_id = 'og-images');
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies WHERE policyname = 'Allow Upload for og-images' AND tablename = 'objects'
+  ) THEN
+    CREATE POLICY "Allow Upload for og-images"
+    ON storage.objects FOR INSERT
+    WITH CHECK (bucket_id = 'og-images');
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies WHERE policyname = 'Allow Update for og-images' AND tablename = 'objects'
+  ) THEN
+    CREATE POLICY "Allow Update for og-images"
+    ON storage.objects FOR UPDATE
+    USING (bucket_id = 'og-images');
+  END IF;
+END;
+$$;
