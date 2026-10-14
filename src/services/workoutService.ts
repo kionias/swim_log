@@ -356,6 +356,7 @@ export const workoutService = {
       total_distance: totalDistance,
       memo: workoutData.memo || '',
       quote,
+      og_image_url: workoutData.og_image_url || null,
       pool,
       class: cls,
       sets: formattedSets,

@@ -39,6 +39,7 @@ CREATE TABLE IF NOT EXISTS public.workouts (
   total_distance INTEGER NOT NULL DEFAULT 0,
   memo TEXT,
   quote TEXT,
+  og_image_url TEXT,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
