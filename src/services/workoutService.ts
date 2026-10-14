@@ -16,21 +16,45 @@ import { calculateTotalDistance } from '../utils/distance';
 import { getQuoteForDate } from '../utils/quotes';
 
 /**
- * Returns the public URL for the OG image at /log_image/YYYY-MM-DD.png
+ * Uploads OG image to Supabase Storage if configured, or returns dataUrl.
  */
 export async function uploadOgImage(dateStr: string, dataUrl: string): Promise<string | null> {
   try {
     const fileName = `${dateStr}.png`;
-    // Convert dataUrl to Blob and save to public/log_image/ via fetch
-    const base64Data = dataUrl.replace(/^data:image\/png;base64,/, '');
-    const binaryStr = atob(base64Data);
-    const bytes = new Uint8Array(binaryStr.length);
-    for (let i = 0; i < binaryStr.length; i++) {
-      bytes[i] = binaryStr.charCodeAt(i);
+
+    // 1. If Supabase is configured, upload to Supabase Storage bucket 'og-images'
+    if (isSupabaseConfigured && supabase) {
+      try {
+        const base64Data = dataUrl.replace(/^data:image\/\w+;base64,/, '');
+        const binaryStr = atob(base64Data);
+        const bytes = new Uint8Array(binaryStr.length);
+        for (let i = 0; i < binaryStr.length; i++) {
+          bytes[i] = binaryStr.charCodeAt(i);
+        }
+        const blob = new Blob([bytes], { type: 'image/png' });
+
+        const { data, error } = await supabase.storage
+          .from('og-images')
+          .upload(fileName, blob, {
+            contentType: 'image/png',
+            upsert: true,
+          });
+
+        if (!error && data) {
+          const { data: publicUrlData } = supabase.storage
+            .from('og-images')
+            .getPublicUrl(fileName);
+          if (publicUrlData?.publicUrl) {
+            return publicUrlData.publicUrl;
+          }
+        }
+      } catch (storageErr) {
+        console.warn('Supabase Storage upload failed, falling back to dataUrl:', storageErr);
+      }
     }
-    // Note: dataUrl is available but not used in static site mode
-    // In production, send dataUrl to server endpoint to save file
-    return `/log_image/${fileName}`;
+
+    // 2. In local mode or fallback, return the generated dataUrl directly
+    return dataUrl;
   } catch (err) {
     console.error('OG image upload failed:', err);
     return null;
@@ -347,6 +371,9 @@ export const workoutService = {
       description: s.description || '',
     }));
 
+    const existingIndex = list.findIndex((w) => w.id === workoutId);
+    const existingWorkout = existingIndex >= 0 ? list[existingIndex] : undefined;
+
     const fullWorkout: WorkoutWithDetails = {
       id: workoutId,
       class_id: workoutData.class_id || null,
@@ -356,22 +383,38 @@ export const workoutService = {
       total_distance: totalDistance,
       memo: workoutData.memo || '',
       quote,
-      og_image_url: workoutData.og_image_url || null,
+      og_image_url: workoutData.og_image_url !== undefined
+        ? workoutData.og_image_url
+        : (existingWorkout?.og_image_url || null),
       pool,
       class: cls,
       sets: formattedSets,
-      created_at: new Date().toISOString(),
+      created_at: existingWorkout?.created_at || new Date().toISOString(),
       updated_at: new Date().toISOString(),
     };
 
-    const existingIndex = list.findIndex((w) => w.id === workoutId);
     if (existingIndex >= 0) {
       list[existingIndex] = fullWorkout;
     } else {
       list.push(fullWorkout);
     }
 
-    localStorage.setItem(STORAGE_KEYS.WORKOUTS, JSON.stringify(list));
+    try {
+      localStorage.setItem(STORAGE_KEYS.WORKOUTS, JSON.stringify(list));
+    } catch (storageErr) {
+      console.warn('localStorage quota exceeded while saving workouts:', storageErr);
+      const pruned = list.map((item, idx) => {
+        if (idx > 5 && item.og_image_url?.startsWith('data:')) {
+          return { ...item, og_image_url: null };
+        }
+        return item;
+      });
+      try {
+        localStorage.setItem(STORAGE_KEYS.WORKOUTS, JSON.stringify(pruned));
+      } catch (e) {
+        console.error('Failed to save to localStorage even after pruning:', e);
+      }
+    }
     return fullWorkout;
   },
 

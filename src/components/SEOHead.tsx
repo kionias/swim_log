@@ -18,7 +18,7 @@ export const SEOHead: React.FC<SEOHeadProps> = ({
   useEffect(() => {
     const origin = typeof window !== 'undefined' ? window.location.origin : '';
     const currentUrl = url || (typeof window !== 'undefined' ? window.location.href : '');
-    const absoluteImageUrl = image.startsWith('http')
+    const absoluteImageUrl = image.startsWith('http') || image.startsWith('data:') || image.startsWith('blob:')
       ? image
       : `${origin}${image.startsWith('/') ? '' : '/'}${image}`;
 

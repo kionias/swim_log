@@ -70,8 +70,13 @@ export const WorkoutDetail: React.FC = () => {
   const totalSets = workouts.reduce((sum, w) => sum + (w.sets?.length || 0), 0);
   const formattedDate = formatKoreanDate(date, true);
 
-  // Try YYYY-MM-DD.png in log_image; fall back to og_tag_image_01.png if file missing
-  const ogImageUrl = `/log_image/${date}.png`;
+  // Priority: 1. Created og_image_url from workout on this date, 2. Pre-rendered static log_image, 3. Default og image
+  const workoutOgImage = workouts.find((w) => Boolean(w.og_image_url))?.og_image_url;
+  const cleanDateStr = date ? date.replace(/-/g, '') : '';
+  const ogImageUrl = workoutOgImage
+    || (cleanDateStr ? `/log_image/${cleanDateStr}.png` : null)
+    || (date ? `/log_image/${date}.png` : null)
+    || '/image/og_tag_image_01.png';
 
   const seoTitle = workouts.length > 0
     ? `${formattedDate} 수영 기록 — 총 거리 ${formatDistance(totalDistance)}, ${totalSets}개 세트 완료 | SWIM LOG`
@@ -218,6 +223,33 @@ export const WorkoutDetail: React.FC = () => {
                 onDelete={handleDeleteWorkout}
               />
             ))}
+
+            {/* Created OG Image Card (Dev mode only) */}
+            {import.meta.env.DEV && (workoutOgImage || (cleanDateStr && `/log_image/${cleanDateStr}.png`)) && (
+              <div className="bg-white rounded-2xl border border-slate-200/80 p-4 sm:p-5 shadow-xs space-y-3">
+                <div className="flex items-center justify-between">
+                  <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
+                    <Share2 className="w-3.5 h-3.5 text-ocean-600" />
+                    <span>공유용 OG 카드 이미지 (개발 모드 전용)</span>
+                  </h4>
+                  <a
+                    href={workoutOgImage || `/log_image/${cleanDateStr}.png`}
+                    download={`SWIM_LOG_OG_${date}.png`}
+                    className="inline-flex items-center gap-1 text-[11px] font-bold text-ocean-600 hover:text-ocean-700 transition"
+                  >
+                    <Download className="w-3 h-3" />
+                    <span>이미지 저장</span>
+                  </a>
+                </div>
+                <div className="overflow-hidden rounded-xl border border-slate-200 shadow-inner bg-slate-900 flex items-center justify-center">
+                  <img
+                    src={workoutOgImage || `/log_image/${cleanDateStr}.png`}
+                    alt={`${formattedDate} 수영 기록 OG 이미지`}
+                    className="w-full h-auto aspect-[1200/630] object-cover"
+                  />
+                </div>
+              </div>
+            )}
           </div>
         </>
       )}

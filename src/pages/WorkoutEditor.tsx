@@ -19,6 +19,7 @@ import { useAuth } from '../context/AuthContext';
 import { calculateTotalDistance, formatDistance } from '../utils/distance';
 import { getRandomQuote } from '../utils/quotes';
 import { toPng } from 'html-to-image';
+import html2canvas from 'html2canvas';
 
 interface SetFormState {
   sequence: number;
@@ -157,12 +158,37 @@ export const WorkoutEditor: React.FC = () => {
     if (!hiddenImageRef.current) return null;
     try {
       // Wait for fonts/images to settle
+      if (document.fonts && document.fonts.ready) {
+        await document.fonts.ready;
+      }
       await new Promise<void>((resolve) => setTimeout(resolve, 200));
-      const dataUrl = await toPng(hiddenImageRef.current, {
-        pixelRatio: 1.5,
-        cacheBust: true,
-        quality: 0.85,
-      });
+
+      let dataUrl = '';
+      try {
+        dataUrl = await toPng(hiddenImageRef.current, {
+          pixelRatio: 1.5,
+          cacheBust: true,
+          width: 1200,
+          height: 630,
+        });
+      } catch (err) {
+        console.warn('toPng failed, falling back to html2canvas', err);
+      }
+
+      // If toPng failed or returned empty/too small, fallback to html2canvas
+      if (!dataUrl || dataUrl.length < 1000) {
+        const canvas = await html2canvas(hiddenImageRef.current, {
+          scale: 1.5,
+          useCORS: true,
+          allowTaint: false,
+          width: 1200,
+          height: 630,
+          backgroundColor: '#041726',
+          logging: false,
+        });
+        dataUrl = canvas.toDataURL('image/png', 0.9);
+      }
+
       const publicUrl = await uploadOgImage(dateStr, dataUrl);
       return publicUrl;
     } catch (err) {
@@ -182,7 +208,7 @@ export const WorkoutEditor: React.FC = () => {
       setSaving(true);
 
       // 1. Generate OG image and upload
-      await generateAndUploadOgImage(workoutDate);
+      const ogImageUrl = await generateAndUploadOgImage(workoutDate);
 
       // 2. Save workout (with og_image_url if upload succeeded)
       await workoutService.saveWorkout(
@@ -194,6 +220,7 @@ export const WorkoutEditor: React.FC = () => {
           duration_minutes: durationMinutes,
           memo,
           quote: quote || getRandomQuote(),
+          og_image_url: ogImageUrl,
         },
         sets.map((set) => ({
           sequence: set.sequence,
@@ -472,104 +499,121 @@ export const WorkoutEditor: React.FC = () => {
         </div>
       </form>
 
-      {/* ─── Hidden OG Image Card (off-screen, rendered for html-to-image) ─── */}
+      {/* ─── Hidden Off-screen Wrapper for OG Image generation ─── */}
       <div
-        ref={hiddenImageRef}
         style={{
           position: 'fixed',
-          top: '-9999px',
           left: '-9999px',
+          top: '0',
           width: '1200px',
           height: '630px',
           overflow: 'hidden',
-          backgroundImage: "url('/image/og_tag_image_01.png')",
-          backgroundPosition: 'center',
-          backgroundSize: 'cover',
-          fontFamily: 'Pretendard, -apple-system, sans-serif',
+          pointerEvents: 'none',
+          opacity: 0,
+          zIndex: -999,
         }}
       >
-        {/* Dark overlay */}
-        <div style={{
-          position: 'absolute',
-          inset: 0,
-          background: 'linear-gradient(to right, rgba(8,47,73,0.90) 45%, rgba(8,47,73,0.55) 80%, transparent)',
-        }} />
+        <div
+          ref={hiddenImageRef}
+          style={{
+            position: 'relative',
+            width: '1200px',
+            height: '630px',
+            overflow: 'hidden',
+            backgroundColor: '#041726',
+            backgroundImage: "url('/image/og_tag_image_01.png')",
+            backgroundPosition: 'center',
+            backgroundSize: 'cover',
+            fontFamily: "Pretendard, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+          }}
+        >
+          {/* Dark gradient overlay */}
+          <div
+            style={{
+              position: 'absolute',
+              inset: 0,
+              background: 'linear-gradient(135deg, rgba(4, 23, 38, 0.92) 0%, rgba(8, 47, 73, 0.84) 50%, rgba(4, 23, 38, 0.94) 100%)',
+            }}
+          />
 
-        {/* Content */}
-        <div style={{
-          position: 'relative',
-          zIndex: 10,
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'center',
-          height: '100%',
-          padding: '56px 72px',
-        }}>
-          {/* Badge */}
-          <span style={{
-            fontSize: '13px',
-            fontWeight: 900,
-            letterSpacing: '0.18em',
-            textTransform: 'uppercase',
-            color: '#67e8f9',
-            marginBottom: '16px',
-          }}>
-            SWIM LOG
-          </span>
+          {/* Centered Total Workout Distance Content */}
+          <div
+            style={{
+              position: 'relative',
+              zIndex: 10,
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              height: '100%',
+              textAlign: 'center',
+              padding: '0 48px',
+            }}
+          >
+            {/* Top pill: SWIM LOG · Date */}
+            <div
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '12px',
+                padding: '8px 24px',
+                borderRadius: '9999px',
+                backgroundColor: 'rgba(255, 255, 255, 0.08)',
+                border: '1px solid rgba(255, 255, 255, 0.15)',
+                marginBottom: '32px',
+              }}
+            >
+              <span
+                style={{
+                  fontSize: '15px',
+                  fontWeight: 900,
+                  letterSpacing: '0.22em',
+                  color: '#67e8f9',
+                }}
+              >
+                SWIM LOG
+              </span>
+              <span style={{ color: 'rgba(255, 255, 255, 0.35)', fontSize: '14px' }}>|</span>
+              <span
+                style={{
+                  fontSize: '17px',
+                  fontWeight: 700,
+                  color: 'rgba(255, 255, 255, 0.85)',
+                  letterSpacing: '0.04em',
+                }}
+              >
+                {workoutDate}
+              </span>
+            </div>
 
-          {/* Date */}
-          <p style={{
-            fontSize: '20px',
-            fontWeight: 700,
-            color: 'rgba(255,255,255,0.75)',
-            marginBottom: '8px',
-            marginTop: 0,
-          }}>
-            {workoutDate}
-          </p>
+            {/* Label: 오늘의 총 운동 거리 */}
+            <p
+              style={{
+                fontSize: '32px',
+                fontWeight: 800,
+                color: '#93c5fd',
+                letterSpacing: '-0.02em',
+                margin: '0 0 20px 0',
+              }}
+            >
+              오늘의 총 운동 거리
+            </p>
 
-          {/* Label */}
-          <p style={{
-            fontSize: '28px',
-            fontWeight: 800,
-            color: 'rgba(255,255,255,0.90)',
-            margin: '0 0 12px 0',
-          }}>
-            오늘의 총 수영 거리 — {formatDistance(totalDistance)} 달성!
-          </p>
-
-          {/* CTA */}
-          <p style={{
-            fontSize: '20px',
-            fontWeight: 700,
-            color: '#67e8f9',
-            margin: '16px 0 0 0',
-          }}>
-            지금 바로 기록 확인하기 →
-          </p>
-
-          {/* Total distance — hero */}
-          <p style={{
-            fontSize: '96px',
-            fontWeight: 900,
-            color: '#ffffff',
-            letterSpacing: '-2px',
-            margin: 0,
-            lineHeight: 1,
-          }}>
-            {formatDistance(totalDistance)}
-          </p>
-
-          {/* Sub info */}
-          <p style={{
-            fontSize: '18px',
-            fontWeight: 600,
-            color: 'rgba(255,255,255,0.65)',
-            marginTop: '20px',
-            marginBottom: 0,
-          }}>
-            {sets.length}개 세트 · {durationMinutes}분
-          </p>
+            {/* Hero Number: Total Distance */}
+            <p
+              style={{
+                fontSize: '128px',
+                fontWeight: 900,
+                color: '#ffffff',
+                letterSpacing: '-3px',
+                lineHeight: 1,
+                margin: 0,
+                textShadow: '0 8px 36px rgba(0, 0, 0, 0.45)',
+              }}
+            >
+              {formatDistance(totalDistance)}
+            </p>
+          </div>
         </div>
       </div>
     </div>
