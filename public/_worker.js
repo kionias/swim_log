@@ -90,6 +90,7 @@ export default {
 
       const headers = new Headers(transformed.headers);
       headers.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+      headers.set('x-og-rewritten', 'true');
 
       return new Response(transformed.body, {
         status: 200,
