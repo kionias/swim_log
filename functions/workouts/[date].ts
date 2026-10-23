@@ -6,13 +6,6 @@ interface Env {
   };
 }
 
-const AVAILABLE_STATIC_LOG_IMAGES = new Set([
-  '20260826', '20260827', '20260828', '20260831',
-  '20260901', '20260902', '20260903', '20260904',
-  '20260907', '20260908', '20260909', '20260910',
-  '20260911', '20260914', '20260915', '20260916',
-  '20260917', '20260918'
-]);
 
 function formatKoreanDate(dateStr: string): string {
   if (!dateStr) return '';
@@ -39,7 +32,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
   }
 
   const domain = new URL(request.url).origin;
-  const cleanDate = date ? date.replace(/-/g, '') : '';
+
   const formattedDate = formatKoreanDate(date);
 
   // Default values
@@ -47,12 +40,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
   let description = `${formattedDate} 수영 운동 상세 기록입니다. 오늘의 총 수영 거리를 확인해 보세요.`;
   let ogImageUrl = `${domain}/image/og_tag_image_01.png`;
 
-  // 1. Static pre-rendered image fallback
-  if (cleanDate && AVAILABLE_STATIC_LOG_IMAGES.has(cleanDate)) {
-    ogImageUrl = `${domain}/log_image/${cleanDate}.png`;
-  }
-
-  // 2. Dynamic Supabase query
+  // Dynamic Supabase query
   const supabaseUrl = env?.VITE_SUPABASE_URL || 'https://ytqrojdwkvgbgcvvaybd.supabase.co';
   const supabaseKey = env?.VITE_SUPABASE_ANON_KEY || 'sb_publishable_fWNEoG25YfEk3p7d17Gfcg_15OmctXE';
 
