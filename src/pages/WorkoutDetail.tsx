@@ -18,6 +18,14 @@ import { ReportModal } from '../components/Report/ReportModal';
 import { SEOHead } from '../components/SEOHead';
 import { useAuth } from '../context/AuthContext';
 
+const AVAILABLE_LOG_IMAGES = new Set([
+  '20260826', '20260827', '20260828', '20260831',
+  '20260901', '20260902', '20260903', '20260904',
+  '20260907', '20260908', '20260909', '20260910',
+  '20260911', '20260914', '20260915', '20260916',
+  '20260917', '20260918'
+]);
+
 export const WorkoutDetail: React.FC = () => {
   const { date } = useParams<{ date: string }>();
   const { isAdmin } = useAuth();
@@ -74,8 +82,8 @@ export const WorkoutDetail: React.FC = () => {
   const workoutOgImage = workouts.find((w) => Boolean(w.og_image_url))?.og_image_url;
   const cleanDateStr = date ? date.replace(/-/g, '') : '';
   const ogImageUrl = workoutOgImage
-    || (cleanDateStr ? `/log_image/${cleanDateStr}.png` : null)
-    || (date ? `/log_image/${date}.png` : null)
+    || (cleanDateStr && AVAILABLE_LOG_IMAGES.has(cleanDateStr) ? `/log_image/${cleanDateStr}.png` : null)
+
     || '/image/og_tag_image_01.png';
 
   const seoTitle = workouts.length > 0
