@@ -426,8 +426,8 @@ export const WorkoutEditor: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                  <div>
+                <div className="grid grid-cols-1 sm:grid-cols-5 gap-2">
+                  <div className="sm:col-span-4">
                     <label className="block text-[11px] font-semibold text-slate-500 mb-0.5">
                       운동 내용
                     </label>
@@ -441,7 +441,7 @@ export const WorkoutEditor: React.FC = () => {
                     />
                   </div>
 
-                  <div>
+                  <div className="sm:col-span-1">
                     <label className="block text-[11px] font-semibold text-slate-500 mb-0.5">
                       거리 (m) *
                     </label>
