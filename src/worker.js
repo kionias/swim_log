@@ -1,5 +1,4 @@
-// Cloudflare Pages / Workers script
-
+// Cloudflare Workers script
 function formatKoreanDate(dateStr) {
   if (!dateStr) return '';
   const [year, month, day] = dateStr.split('-').map(Number);
@@ -16,7 +15,6 @@ export default {
     const match = url.pathname.match(/^\/workouts\/(\d{4}-\d{2}-\d{2})\/?$/);
     if (match) {
       const date = match[1];
-
       const domain = url.origin;
 
       // Always fetch root index.html asset
